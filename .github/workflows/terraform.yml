@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   pull_request:
 
+  workflow_dispatch:
+    inputs:
+      approve:
+        description: 'Approve the next step'
+        required: true
+        default: 'false'
+
 permissions:
   contents: read
 
@@ -41,6 +48,14 @@ jobs:
       - name: Check TFSec issues
         if: ${{ failure() }}
         run: exit 1
+
+  integration_test:
+    needs: tfsec
+    runs-on: ubuntu-latest
+    if: github.event.inputs.approve == 'true' && github.actor in ['oleksii-bebych', 'approved_user2']
+    steps:
+      - name: Deploy to Production
+        run: exit 0
   
 
 
