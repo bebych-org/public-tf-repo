@@ -34,8 +34,8 @@ jobs:
           soft_fail_commenter: true
           tfsec_args: --concise-output
 
-      - name: Run TFSec
-        uses: aquasecurity/tfsec-action@v1.0.3
+      # - name: Run TFSec
+      #   uses: aquasecurity/tfsec-action@v1.0.3
 
       - name: Run Trivy vulnerability scanner in IaC mode
         uses: aquasecurity/trivy-action@master
