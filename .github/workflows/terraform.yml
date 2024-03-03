@@ -10,16 +10,20 @@ permissions:
 
 jobs:
   tfsec:
-    name: tfsec sarif report
+    name: Run tfsec sarif report
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@master
+        uses: actions/checkout@v3
 
-      - name: tfsec
-        uses: tfsec/tfsec-sarif-action@main
-        
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-sarif-action@9a83b5c3524f825c020e356335855741fd02745f
+
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
