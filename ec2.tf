@@ -17,12 +17,12 @@ resource "aws_instance" "example" {
   instance_type = "t3.small"
   subnet_id     = var.subnet_id
 
-#   root_block_device {
-#     volume_size           = "20"
-#     volume_type           = "gp3"
-#     encrypted             = true
-#     delete_on_termination = true
-#   }
+  root_block_device {
+    volume_size           = "20"
+    volume_type           = "gp3"
+    encrypted             = true
+    delete_on_termination = true
+  }
 
   metadata_options {
     http_tokens = "optional"
