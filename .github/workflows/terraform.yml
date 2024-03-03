@@ -32,15 +32,10 @@ jobs:
           github_token: ${{ github.token }}
           working_directory: ''
           soft_fail_commenter: true
+          tfsec_args: --concise-output
 
       - name: Run TFSec
         uses: aquasecurity/tfsec-action@v1.0.3
-        # with:
-        #   soft_fail: false
-
-      # - name: Check TFSec issues
-      #   if: ${{ failure() }}
-      #   run: exit 1
 
   code_review_approve:
     name: Code review and approve
