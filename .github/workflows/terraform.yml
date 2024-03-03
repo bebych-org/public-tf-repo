@@ -21,7 +21,7 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v3
 
-      - name: Run TFSec
+      - name: Generate TFSec report
         id: tfsec
         uses: aquasecurity/tfsec-sarif-action@v0.1.4
         with:
@@ -33,9 +33,12 @@ jobs:
           # Path to SARIF file relative to the root of the repository
           sarif_file: tfsec.sarif
 
-      - name: Check TFSec exit code
-        if: steps.tfsec.tfsec-return-code != 0
-        run: exit 1
+      - name: Run TFSec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          soft_fail: false
+
+
 
   # terraform:
   #   name: 'Terraform'
