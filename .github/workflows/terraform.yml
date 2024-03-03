@@ -7,8 +7,8 @@ on:
 
   workflow_dispatch:
     inputs:
-      review:
-        description: 'Request code review and approval'
+      approve:
+        description: 'Approve the deployment'
         required: true
         default: 'false'
 
@@ -48,44 +48,30 @@ jobs:
         if: ${{ failure() }}
         run: exit 1
 
-  integration_test:
-    # needs: static_analysis
+  approval:
     runs-on: ubuntu-latest
-    if: github.event.inputs.review == 'true'
-    steps:  
-      - name: Request code review
+    needs: static_analysis
+    if: github.event.inputs.approve == 'true'
+    steps:
+      - name: Manual approval
         uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { data: { login } } = await github.rest.users.getAuthenticated();
-            if (login === 'oleksii-bebych' || login === 'approved_user2') {
-              await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: 'Code Review and Approval',
-                body: 'Code changes are ready for review and approval.',
-                labels: ['code review']
-              });
-            } else {
-              throw new Error('User is not authorized to review and approve code.');
-            }
-      - name: Wait for approval
-        id: approval
-        uses: montudor/action-wait-for-approval@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.inputs.issue_number }}
-          message: 'Code review and approval'
-          timeout-minutes: 60
+            await github.rest.actions.createOrUpdateApproval({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.workflow_run.pull_requests[0].number,
+              approval_id: context.workflow_run.id,
+              event: 'APPROVE'
+            })
 
-      - name: Finalize review
-        if: steps.approval.outputs.approved == 'true'
-        run: echo "Code review approved! Proceeding with deployment."
-
-      - name: Cancel review
-        if: steps.approval.outputs.approved == 'false'
-        run: echo "Code review was not approved. Cancelling deployment."
-
+  integration_test:
+    # needs: static_analysis
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to Production
-        run: exit 0
+        if: github.event.inputs.approve == 'true'
+        run: echo "Deployment steps go here"
+
+
