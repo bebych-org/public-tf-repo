@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
   issues: write
-  pull-requests: write
+
 
 jobs:
   static_analysis:
@@ -20,24 +20,39 @@ jobs:
       actions: read
       contents: read
       security-events: write
+      pull-requests: write
 
     steps:
       - name: Clone repo
         uses: actions/checkout@v4.1.0
 
-      - name: TFSec PR commenter
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+      # - name: TFSec PR commenter
+      #   uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
+      #   with:
+      #     github_token: ${{ github.token }}
+      #     working_directory: ''
+      #     soft_fail_commenter: true
+      #     tfsec_args: --concise-output
+
+      # - name: Run TFSec
+      #   uses: aquasecurity/tfsec-action@v1.0.3
+
+      - name: Run Trivy vulnerability scanner in IaC mode
+        uses: aquasecurity/trivy-action@master
         with:
-          github_token: ${{ github.token }}
+          scan-type: 'config'
+          hide-progress: false
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
-      - name: Run TFSec
-        uses: aquasecurity/tfsec-action@v1.0.0
-        # with:
-        #   soft_fail: false
-
-      - name: Check TFSec issues
-        if: ${{ failure() }}
-        run: exit 1
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
 
   code_review_approve:
     name: Code review and approve
