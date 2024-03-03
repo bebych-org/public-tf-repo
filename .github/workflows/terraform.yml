@@ -49,7 +49,7 @@ jobs:
         run: exit 1
 
   integration_test:
-    needs: static_analysis
+    # needs: static_analysis
     runs-on: ubuntu-latest
     if: github.event.inputs.review == 'true'
     steps:  
