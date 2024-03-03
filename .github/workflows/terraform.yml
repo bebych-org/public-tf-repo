@@ -25,15 +25,15 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4.1.0
 
-      - name: Run TFSec
-        uses: aquasecurity/tfsec-action@v1.0.0
-        # with:
-        #   soft_fail: false
-
       - name: TFSec PR commenter
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
+
+      - name: Run TFSec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        # with:
+        #   soft_fail: false
 
       - name: Check TFSec issues
         if: ${{ failure() }}
