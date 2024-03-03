@@ -1,0 +1,24 @@
+# Vim swap files
+.*.sw?
+
+# Terraform/Terragrunt files
+.terraform/
+.terragrunt-cache/
+*.tfstate*
+*.out
+*.terraform.lock.hcl
+
+# IDEA
+.idea/
+.idea_modules/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+.venv
+
+# VS Code
+.vscode
