@@ -48,26 +48,28 @@ jobs:
         if: ${{ failure() }}
         run: exit 1
 
-  approval:
-    needs: static_analysis
+  manual_approval:
     runs-on: ubuntu-latest
-    if: github.event.inputs.approve == 'true'
+    needs: static_analysis
+    if: github.event.inputs.approve != 'true'
     steps:
-      - name: Manual approval
+      - name: Request manual approval
         uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.actions.createOrUpdateApproval({
+            const { data: { html_url } } = await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.payload.workflow_run.pull_requests[0].number,
-              approval_id: context.workflow_run.id,
-              event: 'APPROVE'
-            })
+              workflow_id: 'your_workflow_file_name.yml',
+              ref: 'main',
+              inputs: {
+                approve: 'true'
+              }
+            });
+            console.log(`Workflow run is waiting for manual approval: ${html_url}`);
 
   integration_test:
-    needs: approval
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Production
