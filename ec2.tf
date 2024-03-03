@@ -29,6 +29,6 @@ resource "aws_instance" "example" {
   }
 
   tags = {
-    Name = "tf-example"
+    Name = "tf-example1"
   }
 }
