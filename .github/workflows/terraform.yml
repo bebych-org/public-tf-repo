@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   tfsec:
-    name: Run tfsec sarif report
+    name: Validate and Scan Terraform code
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -34,7 +34,7 @@ jobs:
           sarif_file: tfsec.sarif
 
       - name: Check TFSec exit code
-        if: steps.tfsec.outcome != 'success'
+        if: steps.tfsec.tfsec-return-code != 0
         run: exit 1
 
   # terraform:
