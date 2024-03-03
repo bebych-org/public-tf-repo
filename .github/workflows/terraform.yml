@@ -10,7 +10,7 @@ on:
       review:
         description: 'Request code review and approval'
         required: true
-        default: 'true'
+        default: 'false'
 
 permissions:
   contents: read
@@ -59,7 +59,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { data: { login } } = await github.rest.users.getAuthenticated();
-            if (login === 'approved_user1' || login === 'approved_user2') {
+            if (login === 'oleksii-bebych' || login === 'approved_user2') {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
