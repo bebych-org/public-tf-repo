@@ -49,9 +49,10 @@ jobs:
     needs: static_analysis
     steps:
       - uses: trstringer/manual-approval@v1
+        timeout-minutes: 60
         with:
           secret: ${{ github.TOKEN }}
-          approvers: oleksii-bebych,acdunnigan
+          approvers: oleksii-bebych
           minimum-approvals: 1
       - name: Deploy to Production
         run: echo "Deployment steps go here"
