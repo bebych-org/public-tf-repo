@@ -24,9 +24,9 @@ resource "aws_instance" "example" {
     delete_on_termination = true
   }
 
-#   metadata_options {
-#     http_tokens = "required"
-#   }
+  metadata_options {
+    http_tokens = "required"
+  }
 
   tags = {
     Name = "tf-example"

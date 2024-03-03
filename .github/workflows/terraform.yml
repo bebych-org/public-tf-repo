@@ -1,16 +1,20 @@
-name: 'Terraform'
+name: 'Validate and Scan Terraform code'
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
 
+  workflow_dispatch:
+
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
-  tfsec:
-    name: Run tfsec sarif report
+  static_analysis:
+    name: Validate and Scan Terraform code
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -19,52 +23,40 @@ jobs:
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.0
 
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-sarif-action@9a83b5c3524f825c020e356335855741fd02745f
+      - name: TFSec PR commenter
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
-          sarif_file: tfsec.sarif         
+          github_token: ${{ github.token }}
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Run TFSec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        # with:
+        #   soft_fail: false
+
+      - name: Check TFSec issues
+        if: ${{ failure() }}
+        run: exit 1
+
+  code_review_approve:
+    name: Code review and approve
+    runs-on: ubuntu-latest
+    needs: static_analysis
+    steps:
+      - uses: trstringer/manual-approval@v1
+        timeout-minutes: 60
         with:
-          # Path to SARIF file relative to the root of the repository
-          sarif_file: tfsec.sarif    
+          secret: ${{ github.TOKEN }}
+          approvers: oleksii-bebych
+          minimum-approvals: 1
 
-  # terraform:
-  #   name: 'Terraform'
-  #   runs-on: ubuntu-latest
-  #   environment: production
+  integration_test:
+    name: Integration test
+    runs-on: ubuntu-latest
+    needs: code_review_approve
+    steps:
+      - name: Deploy to Production
+        run: echo "Deployment steps go here"
 
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    # defaults:
-    #   run:
-    #     shell: bash
 
-    # steps:
-    # Checkout the repository to the GitHub Actions runner
-    # - name: Checkout
-    #   uses: actions/checkout@v3
-
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    # - name: Setup Terraform
-    #   uses: hashicorp/setup-terraform@v1
-
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    # - name: Terraform Init
-    #   run: terraform init
-
-    # Checks that all Terraform configuration files adhere to a canonical format
-    # - name: Terraform Format
-    #   run: terraform fmt -check
-
-    # Generates an execution plan for Terraform
-    # - name: Terraform Plan
-    #   run: terraform plan -input=false
-
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    # - name: Terraform Apply
-    #   if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-    #   run: terraform apply -auto-approve -input=false
