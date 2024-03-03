@@ -52,7 +52,7 @@ jobs:
   integration_test:
     needs: tfsec
     runs-on: ubuntu-latest
-    if: github.event.inputs.approve == 'true' && github.actor in ['oleksii-bebych', 'approved_user2']
+    if: github.event.inputs.approve == 'true'
     steps:
       - name: Deploy to Production
         run: exit 0
