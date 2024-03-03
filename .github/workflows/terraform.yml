@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  tfsec:
+  static_analysis:
     name: Validate and Scan Terraform code
     runs-on: ubuntu-latest
     permissions:
@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.0
 
       - name: Generate TFSec report
         id: tfsec
@@ -50,7 +50,7 @@ jobs:
         run: exit 1
 
   integration_test:
-    needs: tfsec
+    needs: static_analysis
     runs-on: ubuntu-latest
     if: github.event.inputs.approve == 'true'
     steps:  
