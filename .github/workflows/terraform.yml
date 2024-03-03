@@ -6,11 +6,6 @@ on:
   pull_request:
 
   workflow_dispatch:
-    inputs:
-      approve:
-        description: 'Approve the deployment'
-        required: true
-        default: 'false'
 
 permissions:
   contents: read
@@ -48,32 +43,14 @@ jobs:
         if: ${{ failure() }}
         run: exit 1
 
-  manual_approval:
-    runs-on: ubuntu-latest
-    needs: static_analysis
-    if: github.event.inputs.approve != 'true'
-    steps:
-      - name: Request manual approval
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { data: { html_url } } = await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'your_workflow_file_name.yml',
-              ref: 'main',
-              inputs: {
-                approve: 'true'
-              }
-            });
-            console.log(`Workflow run is waiting for manual approval: ${html_url}`);
-
   integration_test:
     runs-on: ubuntu-latest
     steps:
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: trstringer,acdunnigan
       - name: Deploy to Production
-        if: github.event.inputs.approve == 'true'
         run: echo "Deployment steps go here"
 
 
